@@ -2,29 +2,50 @@
     "name": "@ziorweb-dev/product-selector",
     "version": "0.0.1",
     "description": "Reusable WordPress product selector component",
-    "main": "dist/index.js",
-    "module": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ZIORWebDev/product-selector.git"
+    },
+    "homepage": "https://github.com/ZIORWebDev/product-selector#readme",
+    "bugs": {
+        "url": "https://github.com/ZIORWebDev/product-selector/issues"
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js",
+            "default": "./dist/index.mjs"
+        }
+    },
     "files": [
         "dist"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "sideEffects": false,
     "scripts": {
         "build": "tsup src/index.ts --format esm,cjs --dts",
         "dev": "tsup src/index.ts --watch --format esm,cjs --dts"
     },
     "peerDependencies": {
+        "@wordpress/api-fetch": ">=7",
         "@wordpress/components": ">=32",
         "@wordpress/element": ">=6",
-        "@wordpress/i18n": ">=6",
-        "@wordpress/api-fetch": ">=7"
+        "@wordpress/i18n": ">=6"
     },
     "devDependencies": {
+        "@types/react": "^18.0.0",
+        "@wordpress/api-fetch": "^7.41.0",
         "@wordpress/components": "^32.1.0",
         "@wordpress/element": "^6.41.0",
         "@wordpress/i18n": "^6.14.0",
-        "@wordpress/api-fetch": "^7.41.0",
-        "@types/react": "^18.0.0",
-        "typescript": "^5.6.0",
-        "tsup": "^8.0.0"
+        "tsup": "^8.0.0",
+        "typescript": "^5.6.0"
     }
 }
