@@ -13,10 +13,14 @@ import type {
 	ProductAttr,
 	ProductSelectorProps,
 	ProductsListResponse,
+	ProductInformation,
 } from "./types"
 
 import { debounce } from "./utils/debounce"
-import { defaultFetchProductOptions } from "./defaultFetchers"
+import {
+	defaultFetchProductOptions,
+	defaultFetchProductInformation,
+} from "./"
 
 type ComboboxOption = { label: string; value: string }
 
@@ -25,13 +29,19 @@ const EMPTY_PRODUCT: ProductAttr = { id: "", label: "" }
 const ProductSelector: FC<ProductSelectorProps> = ({
 	value,
 	onChange = () => {},
+	onProductInformationChange = () => {},
+	onProductInformationError = () => {},
 	fetchOptions = defaultFetchProductOptions,
+	fetchProductInformation = defaultFetchProductInformation,
 }) => {
 	const [product, setProduct] = useState<ProductAttr>(value ?? EMPTY_PRODUCT)
 	const [options, setOptions] = useState<ComboboxOption[]>([])
 	const [searchTerm, setSearchTerm] = useState("")
+	const [isFetchingProductInformation, setIsFetchingProductInformation] =
+		useState(false)
 
 	const reqSeqRef = useRef(0)
+	const productInfoReqSeqRef = useRef(0)
 	const controlWrapRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
@@ -84,6 +94,42 @@ const ProductSelector: FC<ProductSelectorProps> = ({
 		return [{ label, value: productId }, ...options]
 	}, [options, product.id, product.label])
 
+	const handleProductInformationFetch = useCallback(
+		async (selectedProduct: ProductAttr) => {
+			const id = String(selectedProduct?.id ?? "")
+
+			if (!id) {
+				onProductInformationChange(null, selectedProduct)
+				return
+			}
+
+			const seq = ++productInfoReqSeqRef.current
+			setIsFetchingProductInformation(true)
+
+			try {
+				const productInformation: ProductInformation | null =
+					await fetchProductInformation(id)
+
+				if (seq !== productInfoReqSeqRef.current) return
+
+				onProductInformationChange(productInformation, selectedProduct)
+			} catch (error) {
+				if (seq !== productInfoReqSeqRef.current) return
+
+				onProductInformationError(error, selectedProduct)
+			} finally {
+				if (seq === productInfoReqSeqRef.current) {
+					setIsFetchingProductInformation(false)
+				}
+			}
+		},
+		[
+			fetchProductInformation,
+			onProductInformationChange,
+			onProductInformationError,
+		]
+	)
+
 	return (
 		<div className="components-base-control" ref={controlWrapRef}>
 			<ComboboxControl
@@ -101,6 +147,7 @@ const ProductSelector: FC<ProductSelectorProps> = ({
 
 					setProduct(newProduct)
 					onChange(newProduct)
+					void handleProductInformationFetch(newProduct)
 
 					requestAnimationFrame(() => blurCombobox())
 				}}
@@ -109,7 +156,9 @@ const ProductSelector: FC<ProductSelectorProps> = ({
 			/>
 
 			<p className="components-base-control__help">
-				{__("Only choose products safe for public display.")}
+				{isFetchingProductInformation
+					? __("Loading product information...")
+					: __("Only choose products safe for public display.")}
 			</p>
 		</div>
 	)

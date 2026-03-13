@@ -1,28 +1,5 @@
-import { FC } from 'react';
-
-type ProductAttr = {
-    id: string;
-    label: string;
-};
-type ProductApiProduct = {
-    id: string | number;
-    name: string;
-};
-type ProductsListResponse = {
-    products?: ProductApiProduct[];
-};
-type FetchProductOptions = (search: unknown, productId: unknown) => Promise<ProductsListResponse>;
-interface ProductSelectorProps {
-    value?: ProductAttr | null;
-    onChange?: (value: ProductAttr) => void;
-    /**
-     * Custom fetcher
-     */
-    fetchOptions?: FetchProductOptions;
-}
-
-declare const ProductSelector: FC<ProductSelectorProps>;
-
-declare function defaultFetchProductOptions(search: unknown, productId: unknown): Promise<ProductsListResponse>;
-
-export { type FetchProductOptions, type ProductAttr, ProductSelector, type ProductSelectorProps, type ProductsListResponse, defaultFetchProductOptions };
+export { default as ProductSelector } from "./ProductSelector";
+export type { ProductAttr, ProductSelectorProps, ProductsListResponse, ProductInformation, FetchProductOptions, FetchProductInformation, } from "./types";
+export { defaultFetchProductOptions } from "./ProductOptions";
+export { defaultFetchProductInformation } from "./ProductInformation";
+//# sourceMappingURL=index.d.ts.map

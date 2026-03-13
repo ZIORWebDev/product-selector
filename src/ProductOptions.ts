@@ -1,7 +1,5 @@
-import apiFetch from '@wordpress/api-fetch'
-import type { ProductsListResponse } from './types'
-
-type ProductApiProduct = { id: number | string; name: string }
+import apiFetch from "@wordpress/api-fetch"
+import type { ProductsListResponse } from "./types"
 
 declare const ZIORWPBlocks: {
 	restUrl: string
@@ -20,8 +18,8 @@ const hashString = (str: string) => {
 const buildQuery = (search: unknown, productId: unknown) => {
 	const params = new URLSearchParams()
 
-	params.set('search', String(search ?? '').trim().toLowerCase())
-	params.set('productId', String(productId ?? ''))
+	params.set("search", String(search ?? "").trim().toLowerCase())
+	params.set("productId", String(productId ?? ""))
 
 	return `products/lists?${params.toString()}`
 }
@@ -30,14 +28,15 @@ export async function defaultFetchProductOptions(
 	search: unknown,
 	productId: unknown
 ): Promise<ProductsListResponse> {
-
 	const query = buildQuery(search, productId)
 	const key = hashString(query)
 
 	ZIORWPBlocks.queries = ZIORWPBlocks.queries || {}
 
 	const cached = ZIORWPBlocks.queries[key]
-	if (cached) return cached
+	if (cached) {
+		return cached
+	}
 
 	const results = await apiFetch<ProductsListResponse>({
 		path: `/${ZIORWPBlocks.restUrl}/${query}`,
