@@ -1,6 +1,6 @@
 {
     "name": "@ziorweb.dev/product-selector",
-    "version": "0.1.0",
+    "version": "0.1.5",
     "description": "Reusable WordPress product selector component",
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -13,15 +13,15 @@
         "dev": "tsup src/index.ts --watch --format esm,cjs --dts"
     },
     "peerDependencies": {
-        "@wordpress/components": ">=29 <33",
-        "@wordpress/element": ">=29 <33",
-        "@wordpress/i18n": ">=29 <33",
-        "react": "^18.0.0"
+        "@wordpress/components": ">=32",
+        "@wordpress/element": ">=6",
+        "@wordpress/i18n": ">=6",
+        "@wordpress/api-fetch": ">=7"
     },
     "devDependencies": {
         "@wordpress/components": "^32.1.0",
-        "@wordpress/element": "^6.30.0",
-        "@wordpress/i18n": "^6.30.0",
+        "@wordpress/element": "^6.41.0",
+        "@wordpress/i18n": "^6.14.0",
         "@wordpress/api-fetch": "^6.0.0",
         "@types/react": "^18.0.0",
         "typescript": "^5.6.0",
