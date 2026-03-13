@@ -99,6 +99,11 @@ jobs:
             echo "Version ${PACKAGE_NAME}@${PACKAGE_VERSION} does not exist on npm. Publishing."
           fi
 
+      - name: Verify npm auth
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to NPM
         if: steps.npm_check.outputs.exists == 'false'
         run: |
