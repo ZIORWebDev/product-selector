@@ -164,9 +164,3 @@ npm publish
 ```
 
 If using GitHub Actions, the package can also be automatically published when changes are pushed to the `main` branch.
-
----
-
-## License
-
-MIT
