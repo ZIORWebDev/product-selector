@@ -1,6 +1,6 @@
 {
     "name": "@zior/product-selector",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Reusable WordPress product selector component",
     "main": "dist/index.js",
     "module": "dist/index.js",
