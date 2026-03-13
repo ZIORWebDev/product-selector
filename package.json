@@ -1,6 +1,6 @@
 {
     "name": "@ziorweb-dev/product-selector",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Reusable WordPress product selector component",
     "license": "MIT",
     "repository": {
@@ -31,7 +31,8 @@
     "sideEffects": false,
     "scripts": {
         "build": "tsup src/index.ts --format esm,cjs --dts",
-        "dev": "tsup src/index.ts --watch --format esm,cjs --dts"
+        "dev": "tsup src/index.ts --watch --format esm,cjs --dts",
+        "deploy": "npm run build && npm publish --access public"
     },
     "peerDependencies": {
         "@wordpress/api-fetch": ">=7",
