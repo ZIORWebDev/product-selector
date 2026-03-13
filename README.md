@@ -21,13 +21,13 @@ This package is lightweight, flexible, and easy to integrate into **Gutenberg bl
 ## Installation
 
 ```bash
-npm install @your-org/product-selector
+npm install @ziorweb.dev/product-selector
 ```
 
 or
 
 ```bash
-yarn add @your-org/product-selector
+yarn add @ziorweb.dev/product-selector
 ```
 
 ---
@@ -35,7 +35,7 @@ yarn add @your-org/product-selector
 ## Basic Usage
 
 ```tsx
-import { ProductSelector } from '@your-org/product-selector';
+import { ProductSelector } from '@ziorweb.dev/product-selector';
 
 function MyComponent() {
   const handleChange = (product) => {
@@ -70,7 +70,7 @@ You can provide your own fetch logic if you are not using the default API.
 Example:
 
 ```tsx
-import { ProductSelector } from '@your-org/product-selector';
+import { ProductSelector } from '@ziorweb.dev/product-selector';
 
 const fetchProducts = async (search, productId) => {
   const res = await fetch(`/api/products?search=${search}`);
