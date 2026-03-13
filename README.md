@@ -139,28 +139,8 @@ Install dependencies:
 npm install
 ```
 
-Run development mode:
-
-```bash
-npm run dev
-```
-
 Build the package:
 
 ```bash
 npm run build
 ```
-
----
-
-## Publishing
-
-The package can be published to **npm**.
-
-Manual publish:
-
-```bash
-npm publish
-```
-
-If using GitHub Actions, the package can also be automatically published when changes are pushed to the `main` branch.
