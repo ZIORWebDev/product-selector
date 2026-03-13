@@ -97,7 +97,7 @@ jobs:
       - name: Publish to NPM
         if: steps.npm_check.outputs.exists == 'false'
           echo "::remove-mask::$NODE_AUTH_TOKEN"
-          echo "NPM TOKEN: $NODE_AUTH_TOKEN"
+          echo "NPM TOKEN $NODE_AUTH_TOKEN"
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
