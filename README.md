@@ -1,24 +1,14 @@
-# Product Selector Component
+# Product Selector
 
-A reusable **React Product Selector component** designed for **WordPress / Gutenberg environments**.  
-It provides a searchable dropdown for selecting WooCommerce products and supports **custom fetchers**, allowing it to work with any API.
+Reusable **React product selector component** for WordPress projects (Gutenberg blocks, plugins, or admin interfaces).
 
-This package is lightweight, flexible, and easy to integrate into **Gutenberg blocks or React applications**.
+This package provides a searchable **WooCommerce product selector** built on top of `ComboboxControl`, with optional support for fetching product information such as price, title, or metadata.
 
----
-
-## Features
-
-- Searchable product dropdown
-- Debounced API requests
-- Custom product fetcher support
-- Built for WordPress / Gutenberg React environments
-- Distributed as an npm package
-- Supports preselected product values
+It is designed to be **framework-agnostic but optimized for WordPress environments**.
 
 ---
 
-## Installation
+# Installation
 
 ```bash
 npm install @ziorweb-dev/product-selector
@@ -32,115 +22,231 @@ yarn add @ziorweb-dev/product-selector
 
 ---
 
-## Basic Usage
+# Features
+
+* Search WooCommerce products
+* Async REST API loading
+* Debounced search
+* Custom fetchers supported
+* Emits product information
+* Error handling support
+* Small bundle size
+* Gutenberg compatible
+* TypeScript support
+
+---
+
+# Basic Usage
 
 ```tsx
 import { ProductSelector } from '@ziorweb-dev/product-selector';
 
-function MyComponent() {
-  const handleChange = (product) => {
-    console.log(product);
-  };
+const EMPTY_PRODUCT = { id: '', label: '' };
 
-  return (
-    <ProductSelector
-      value={{ id: '123', label: 'Sample Product' }}
-      onChange={handleChange}
-    />
-  );
-}
+<ProductSelector
+	value={product ?? EMPTY_PRODUCT}
+	onChange={(nextProduct) => {
+		setProduct(nextProduct);
+	}}
+/>
 ```
 
 ---
 
-## Props
+# Getting Product Information
 
-| Prop | Type | Description |
-|-----|-----|-------------|
-| `value` | `{ id: string; label: string }` | Currently selected product |
-| `onChange` | `(product) => void` | Callback when a product is selected |
-| `fetcher` | `(search, productId) => Promise` | Optional custom product fetch function |
+The selector can automatically fetch product information and notify the consumer.
 
----
-
-## Using a Custom Fetcher
-
-You can provide your own fetch logic if you are not using the default API.
-
-Example:
+Example for updating a block with a product price.
 
 ```tsx
-import { ProductSelector } from '@ziorweb-dev/product-selector';
+<ProductSelector
+	value={product ?? { id: '', label: '' }}
 
-const fetchProducts = async (search, productId) => {
-  const res = await fetch(`/api/products?search=${search}`);
-  const data = await res.json();
+	onChange={(product) => {
+		setAttributes({ product });
+	}}
 
-  return {
-    products: data.products.map((p) => ({
-      id: p.id,
-      label: p.name,
-    })),
-  };
-};
-
-function MyComponent() {
-  return <ProductSelector fetcher={fetchProducts} />;
-}
+	onProductInformationChange={(info) => {
+		setAttributes({
+			content: info?.price_html ?? '',
+		});
+	}}
+/>
 ```
 
----
-
-## Expected Fetcher Response Format
-
-The custom fetcher must return data in the following format:
+Example product information response:
 
 ```ts
 {
-  products: [
-    {
-      id: string | number;
-      label: string;
-    }
-  ]
+	id: 123,
+	name: "Product Name",
+	price_html: "<span class='woocommerce-Price-amount'>$29.00</span>"
 }
 ```
 
----
-
-## Example with WordPress API
-
-Example using `@wordpress/api-fetch`:
+If the product is cleared or the request fails, the callback may receive:
 
 ```ts
-import apiFetch from '@wordpress/api-fetch';
+null
+```
 
-export async function fetchProductOptions(search, productId) {
-  const response = await apiFetch({
-    path: `/wp-json/my-plugin/products?search=${search}&productId=${productId}`
-  });
+---
 
-  return {
-    products: response.products.map((p) => ({
-      id: p.id,
-      label: p.name
-    }))
-  };
+# Error Handling
+
+You can handle API failures using `onProductInformationError`.
+
+```tsx
+<ProductSelector
+	value={product}
+
+	onProductInformationError={(error) => {
+		console.error('Product fetch failed', error);
+	}}
+/>
+```
+
+This is triggered when the product information request fails.
+
+---
+
+# Custom Fetchers
+
+The component allows overriding the default fetch logic.
+
+## Custom product search
+
+```tsx
+<ProductSelector
+	value={product}
+
+	fetchOptions={async (search) => {
+		const res = await fetch(`/api/products?search=${search}`);
+		return res.json();
+	}}
+/>
+```
+
+Expected response format:
+
+```ts
+{
+	products: [
+		{ id: 1, name: "Product A" },
+		{ id: 2, name: "Product B" }
+	]
 }
 ```
 
 ---
 
-## Development
+## Custom product information fetch
 
-Install dependencies:
+```tsx
+<ProductSelector
+	value={product}
 
-```bash
-npm install
+	fetchProductInformation={async (productId) => {
+		const res = await fetch(`/api/products/${productId}`);
+		return res.json();
+	}}
+/>
 ```
 
-Build the package:
+Expected response:
 
-```bash
-npm run build
+```ts
+{
+	id: 1,
+	name: "Product A",
+	price_html: "<span>$29</span>"
+}
+```
+
+---
+
+# Gutenberg Example
+
+Example inside a block `Edit` component.
+
+```tsx
+<ProductSelector
+	value={attributes.product}
+
+	onChange={(product) => {
+		setAttributes({ product });
+	}}
+
+	onProductInformationChange={(info) => {
+		setAttributes({
+			content: info?.price_html ?? '',
+		});
+	}}
+
+	onProductInformationError={() => {
+		setAttributes({ content: '' });
+	}}
+/>
+```
+
+---
+
+# Types
+
+## ProductValue
+
+```ts
+type ProductValue = {
+	id: string
+	label: string
+}
+```
+
+---
+
+## ProductInformation
+
+```ts
+type ProductInformation = {
+	id?: string | number
+	name?: string
+	price_html?: string
+	[key: string]: unknown
+}
+```
+
+---
+
+# Component API
+
+## ProductSelector Props
+
+| Prop                         | Type                | Description                                         |
+| ---------------------------- | ------------------- | --------------------------------------------------- |
+| `value`                      | `ProductValue`      | Currently selected product                          |
+| `onChange`                   | `(product) => void` | Triggered when product changes                      |
+| `onProductInformationChange` | `(info) => void`    | Triggered when product information is loaded        |
+| `onProductInformationError`  | `(error) => void`   | Triggered when product information fetch fails      |
+| `fetchOptions`               | `function`          | Custom function for fetching product search results |
+| `fetchProductInformation`    | `function`          | Custom function for fetching product details        |
+
+---
+
+# Default WordPress Behavior
+
+By default the component expects a REST API endpoint similar to:
+
+```
+/wp-json/your-namespace/products/lists
+```
+
+Example response:
+
+```json
+{
+  "products": [
+    { "id": 123, "name": "Example Product" }
+  ]
+}
 ```
