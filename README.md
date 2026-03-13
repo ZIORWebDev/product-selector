@@ -1,1 +1,1 @@
-# woocommerce-product-selector
+# Product Selector Component
