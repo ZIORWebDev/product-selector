@@ -1,5 +1,5 @@
 {
-    "name": "@zior/product-selector",
+    "name": "@ziorwebdev/product-selector",
     "version": "0.1.0",
     "description": "Reusable WordPress product selector component",
     "main": "dist/index.js",
