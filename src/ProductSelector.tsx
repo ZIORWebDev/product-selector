@@ -28,7 +28,6 @@ const EMPTY_PRODUCT: ProductAttr = { id: "", label: "" }
 
 const ProductSelector: FC<ProductSelectorProps> = ({
 	value,
-	onChange = () => {},
 	onProductInformationChange = () => {},
 	onProductInformationError = () => {},
 	fetchOptions = defaultFetchProductOptions,
@@ -80,7 +79,7 @@ const ProductSelector: FC<ProductSelectorProps> = ({
 
 	useEffect(() => {
 		loadOptions(searchTerm, product.id)
-	}, [searchTerm, product.id, loadOptions])
+	}, [searchTerm, loadOptions])
 
 	const displayedOptions = useMemo(() => {
 		const productId = product?.id ? String(product.id) : ""
@@ -130,6 +129,10 @@ const ProductSelector: FC<ProductSelectorProps> = ({
 		]
 	)
 
+	useEffect(() => {
+		void handleProductInformationFetch(product)
+	}, [product?.id, handleProductInformationFetch])
+
 	return (
 		<div className="components-base-control" ref={controlWrapRef}>
 			<ComboboxControl
@@ -146,9 +149,6 @@ const ProductSelector: FC<ProductSelectorProps> = ({
 					}
 
 					setProduct(newProduct)
-					onChange(newProduct)
-					void handleProductInformationFetch(newProduct)
-
 					requestAnimationFrame(() => blurCombobox())
 				}}
 				onFilterValueChange={(val) => setSearchTerm(String(val))}
