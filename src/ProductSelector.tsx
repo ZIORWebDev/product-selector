@@ -1,4 +1,3 @@
-import type { FC } from "react"
 import {
 	useState,
 	useEffect,
@@ -26,13 +25,13 @@ type ComboboxOption = { label: string; value: string }
 
 const EMPTY_PRODUCT: ProductAttr = { id: "", label: "" }
 
-const ProductSelector: FC<ProductSelectorProps> = ({
+const ProductSelector = ({
 	value,
 	onProductInformationChange = () => {},
 	onProductInformationError = () => {},
 	fetchOptions = defaultFetchProductOptions,
 	fetchProductInformation = defaultFetchProductInformation,
-}) => {
+}: ProductSelectorProps) => {
 	const [product, setProduct] = useState<ProductAttr>(value ?? EMPTY_PRODUCT)
 	const [options, setOptions] = useState<ComboboxOption[]>([])
 	const [searchTerm, setSearchTerm] = useState("")
