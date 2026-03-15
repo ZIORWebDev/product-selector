@@ -27,6 +27,7 @@ const EMPTY_PRODUCT: ProductAttr = { id: "", label: "" }
 
 const ProductSelector = ({
 	value,
+	onChange = () => {},
 	onProductInformationChange = () => {},
 	onProductInformationError = () => {},
 	fetchOptions = defaultFetchProductOptions,
@@ -44,7 +45,7 @@ const ProductSelector = ({
 
 	useEffect(() => {
 		setProduct(value ?? EMPTY_PRODUCT)
-	}, [value?.id, value?.label])
+	}, [value])
 
 	const blurCombobox = useCallback(() => {
 		const input = controlWrapRef.current?.querySelector("input")
@@ -56,10 +57,14 @@ const ProductSelector = ({
 			const seq = ++reqSeqRef.current
 
 			try {
-				const results: ProductsListResponse =
-					await fetchOptions(search, productId)
+				const results: ProductsListResponse = await fetchOptions(
+					search,
+					productId
+				)
 
-				if (seq !== reqSeqRef.current) return
+				if (seq !== reqSeqRef.current) {
+					return
+				}
 
 				const products = results?.products ?? []
 
@@ -70,7 +75,10 @@ const ProductSelector = ({
 					}))
 				)
 			} catch {
-				if (seq !== reqSeqRef.current) return
+				if (seq !== reqSeqRef.current) {
+					return
+				}
+
 				setOptions([])
 			}
 		}, 300)
@@ -78,14 +86,18 @@ const ProductSelector = ({
 
 	useEffect(() => {
 		loadOptions(searchTerm, product.id)
-	}, [searchTerm, loadOptions])
+	}, [searchTerm, product.id, loadOptions])
 
 	const displayedOptions = useMemo(() => {
 		const productId = product?.id ? String(product.id) : ""
 
-		if (!productId) return options
+		if (!productId) {
+			return options
+		}
 
-		if (options.some((o) => o.value === productId)) return options
+		if (options.some((option) => option.value === productId)) {
+			return options
+		}
 
 		const label = product?.label?.trim() || `#${productId}`
 
@@ -108,11 +120,15 @@ const ProductSelector = ({
 				const productInformation: ProductInformation | null =
 					await fetchProductInformation(id)
 
-				if (seq !== productInfoReqSeqRef.current) return
+				if (seq !== productInfoReqSeqRef.current) {
+					return
+				}
 
 				onProductInformationChange(productInformation, selectedProduct)
 			} catch (error) {
-				if (seq !== productInfoReqSeqRef.current) return
+				if (seq !== productInfoReqSeqRef.current) {
+					return
+				}
 
 				onProductInformationError(error, selectedProduct)
 			} finally {
@@ -130,27 +146,33 @@ const ProductSelector = ({
 
 	useEffect(() => {
 		void handleProductInformationFetch(product)
-	}, [product?.id, handleProductInformationFetch])
-
+	}, [product, handleProductInformationFetch])
+	console.log('product', product);
 	return (
 		<div className="components-base-control" ref={controlWrapRef}>
 			<ComboboxControl
 				label={__("Product")}
-				value={product.id}
+				value={String(product?.id ?? "")}
 				options={displayedOptions}
 				onChange={(val) => {
 					const id = String(val ?? "")
-					const selected = displayedOptions.find((o) => o.value === id)
+					const selected = displayedOptions.find((option) => option.value === id)
 
 					const newProduct: ProductAttr = {
 						id,
-						label: selected?.label || "",
+						label: selected?.label ?? "",
 					}
 
 					setProduct(newProduct)
-					requestAnimationFrame(() => blurCombobox())
+					onChange(newProduct)
+
+					requestAnimationFrame(() => {
+						blurCombobox()
+					})
 				}}
-				onFilterValueChange={(val) => setSearchTerm(String(val))}
+				onFilterValueChange={(val) => {
+					setSearchTerm(String(val ?? ""))
+				}}
 				placeholder={__("Type to search products...")}
 			/>
 
