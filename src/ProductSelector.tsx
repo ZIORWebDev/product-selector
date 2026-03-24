@@ -4,6 +4,7 @@ import {
 	useCallback,
 	useMemo,
 	useRef,
+	memo,
 } from "@wordpress/element"
 import { ComboboxControl } from "@wordpress/components"
 import { __ } from "@wordpress/i18n"
@@ -24,16 +25,20 @@ import {
 type ComboboxOption = { label: string; value: string }
 
 const EMPTY_PRODUCT: ProductAttr = { id: "", label: "" }
+const noop = () => {}
 
 const ProductSelector = ({
 	value,
-	onChange = () => {},
-	onProductInformationChange = () => {},
-	onProductInformationError = () => {},
+	onChange = noop,
+	onProductInformationChange = noop,
+	onProductInformationError = noop,
 	fetchOptions = defaultFetchProductOptions,
 	fetchProductInformation = defaultFetchProductInformation,
 }: ProductSelectorProps) => {
-	const [product, setProduct] = useState<ProductAttr>(value ?? EMPTY_PRODUCT)
+	const selectedProduct = value ?? EMPTY_PRODUCT
+	const productId = String(selectedProduct?.id ?? "")
+	const productLabel = String(selectedProduct?.label ?? "")
+
 	const [options, setOptions] = useState<ComboboxOption[]>([])
 	const [searchTerm, setSearchTerm] = useState("")
 	const [isFetchingProductInformation, setIsFetchingProductInformation] =
@@ -41,11 +46,8 @@ const ProductSelector = ({
 
 	const reqSeqRef = useRef(0)
 	const productInfoReqSeqRef = useRef(0)
+	const lastFetchedProductIdRef = useRef("")
 	const controlWrapRef = useRef<HTMLDivElement | null>(null)
-
-	useEffect(() => {
-		setProduct(value ?? EMPTY_PRODUCT)
-	}, [value])
 
 	const blurCombobox = useCallback(() => {
 		const input = controlWrapRef.current?.querySelector("input")
@@ -53,13 +55,13 @@ const ProductSelector = ({
 	}, [])
 
 	const loadOptions = useMemo(() => {
-		return debounce(async (search: unknown, productId: unknown) => {
+		return debounce(async (search: unknown, currentProductId: unknown) => {
 			const seq = ++reqSeqRef.current
 
 			try {
 				const results: ProductsListResponse = await fetchOptions(
 					search,
-					productId
+					currentProductId
 				)
 
 				if (seq !== reqSeqRef.current) {
@@ -85,12 +87,14 @@ const ProductSelector = ({
 	}, [fetchOptions])
 
 	useEffect(() => {
-		loadOptions(searchTerm, product.id)
-	}, [searchTerm, product.id, loadOptions])
+		loadOptions(searchTerm, productId)
+
+		return () => {
+			loadOptions.cancel?.()
+		}
+	}, [searchTerm, loadOptions])
 
 	const displayedOptions = useMemo(() => {
-		const productId = product?.id ? String(product.id) : ""
-
 		if (!productId) {
 			return options
 		}
@@ -99,17 +103,15 @@ const ProductSelector = ({
 			return options
 		}
 
-		const label = product?.label?.trim() || `#${productId}`
+		const fallbackLabel = productLabel.trim() || `#${productId}`
 
-		return [{ label, value: productId }, ...options]
-	}, [options, product.id, product.label])
+		return [{ label: fallbackLabel, value: productId }, ...options]
+	}, [options, productId, productLabel])
 
 	const handleProductInformationFetch = useCallback(
-		async (selectedProduct: ProductAttr) => {
-			const id = String(selectedProduct?.id ?? "")
-
+		async (id: string, product: ProductAttr) => {
 			if (!id) {
-				onProductInformationChange(null, selectedProduct)
+				onProductInformationChange(null, product)
 				return
 			}
 
@@ -124,13 +126,13 @@ const ProductSelector = ({
 					return
 				}
 
-				onProductInformationChange(productInformation, selectedProduct)
+				onProductInformationChange(productInformation, product)
 			} catch (error) {
 				if (seq !== productInfoReqSeqRef.current) {
 					return
 				}
 
-				onProductInformationError(error, selectedProduct)
+				onProductInformationError(error, product)
 			} finally {
 				if (seq === productInfoReqSeqRef.current) {
 					setIsFetchingProductInformation(false)
@@ -145,26 +147,44 @@ const ProductSelector = ({
 	)
 
 	useEffect(() => {
-		void handleProductInformationFetch(product)
-	}, [product, handleProductInformationFetch])
-	console.log('product', product);
+		const currentProduct: ProductAttr = {
+			id: productId,
+			label: productLabel,
+		}
+
+		if (!productId) {
+			lastFetchedProductIdRef.current = ""
+			onProductInformationChange(null, currentProduct)
+			return
+		}
+
+		if (lastFetchedProductIdRef.current === productId) {
+			return
+		}
+
+		lastFetchedProductIdRef.current = productId
+		void handleProductInformationFetch(productId, currentProduct)
+	}, [
+		productId,
+		productLabel,
+		handleProductInformationFetch,
+		onProductInformationChange,
+	])
+
 	return (
 		<div className="components-base-control" ref={controlWrapRef}>
 			<ComboboxControl
 				label={__("Product")}
-				value={String(product?.id ?? "")}
+				value={productId}
 				options={displayedOptions}
 				onChange={(val) => {
 					const id = String(val ?? "")
 					const selected = displayedOptions.find((option) => option.value === id)
 
-					const newProduct: ProductAttr = {
+					onChange({
 						id,
 						label: selected?.label ?? "",
-					}
-
-					setProduct(newProduct)
-					onChange(newProduct)
+					})
 
 					requestAnimationFrame(() => {
 						blurCombobox()
@@ -185,4 +205,4 @@ const ProductSelector = ({
 	)
 }
 
-export default ProductSelector
+export default memo(ProductSelector)
