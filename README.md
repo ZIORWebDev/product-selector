@@ -1,6 +1,6 @@
 # Product Selector
 
-Reusable **React product selector component** for WordPress projects (Gutenberg blocks, plugins, or admin interfaces).
+Reusable **React product selector component** for WordPress projects (Gutenberg blocks).
 
 This package provides a searchable **WooCommerce product selector** built on top of `ComboboxControl`, with optional support for fetching product information such as price, title, or metadata.
 
